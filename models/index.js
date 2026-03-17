@@ -1,0 +1,2 @@
+export { userTable } from "./userModel";
+

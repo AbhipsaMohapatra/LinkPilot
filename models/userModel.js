@@ -1,0 +1,22 @@
+// import { primaryKey } from "drizzle-orm/gel-core";
+// import { varchar } from "drizzle-orm/mysql-core";
+import { pgTable,uuid,text,varchar,timestamp } from "drizzle-orm/pg-core";
+// import { text } from "node:stream/consumers";
+
+export const userTable = pgTable('users',{
+    id: uuid().primaryKey().defaultRandom(),
+
+    firstName: varchar("first_name",{length:55}).notNull(),
+    lastName: varchar("last_name",{length:55}),
+
+    email: varchar({length:255}).unique().notNull(),
+    
+    password: text().unique().notNull(),
+    salt :text().notNull(),
+
+
+    createdAt : timestamp('created_at').defaultNow().notNull(),
+    updatedAt : timestamp('updated_at').$onUpdate(()=> new Date())
+
+
+})
