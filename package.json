@@ -1,0 +1,30 @@
+{
+  "name": "link_pilot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AbhipsaMohapatra/LinkPilot.git"
+  },
+  "author": "Abhipsa Mohapatra",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AbhipsaMohapatra/LinkPilot/issues"
+  },
+  "homepage": "https://github.com/AbhipsaMohapatra/LinkPilot#readme",
+  "description": "",
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "nodemon": "^3.1.14"
+  }
+}
