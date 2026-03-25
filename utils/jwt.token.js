@@ -13,3 +13,17 @@ export const  getJWTToken = async(payload)=>{
     return token;
 
 }
+
+export const validateUserToken = (token)=>{
+    try{
+        const payload=jwt.verify(token,JWT_SECRET);
+        return payload
+    }
+    catch(err){
+        console.log(err);
+        return null;
+
+    }
+    
+
+}
