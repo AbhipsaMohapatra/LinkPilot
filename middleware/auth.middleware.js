@@ -17,3 +17,10 @@ export const authValidateMiddleware = async(req,res,next)=>{
   return next();
 
 }
+
+export const isExistingUserAuthenticated = async(req,res,next)=>{
+  if(!req.user || !req.user.id){
+    return res.status(401).json({ error: "You need authorization token" });
+  }
+  return next();
+}

@@ -18,5 +18,5 @@ app.use("/user",UserRouter);
 app.use(UrlRouter);
 
 app.listen(PORT,()=>{
-    console.log("Server listenong on PORT ",PORT);
+    console.log("Server listening on PORT ",PORT);
 })
