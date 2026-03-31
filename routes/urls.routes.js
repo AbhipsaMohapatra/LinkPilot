@@ -9,6 +9,7 @@ import { urlTable } from "../models/url.model.js";
 import { isExistingUserAuthenticated } from "../middleware/auth.middleware.js";
 import { insertIntoUrlTable } from "../services/users.services.js";
 import { userTable } from "../models/userModel.js";
+import { getUrlById } from "../services/urls.services.js";
 
 const router = express.Router();
 
@@ -81,6 +82,10 @@ router.delete("/:id",[authValidateMiddleware, isExistingUserAuthenticated], asyn
   const id = req.params.id;
 
   try {
+    const [exists] = await getUrlById(id);
+    if(!exists){
+      return res.status(400).json({error:"No such URLS exists"});
+    }
    const result =  await db
       .delete(urlTable)
       .where(and(eq(urlTable.id, id), eq(urlTable.userId, req.user.id)));
@@ -94,6 +99,33 @@ router.delete("/:id",[authValidateMiddleware, isExistingUserAuthenticated], asyn
     res.json({error:"Some errir occures"})
   }
 });
+
+router.patch("/update/:id",[authValidateMiddleware,isExistingUserAuthenticated],async(req,res)=>{
+  const id = req.params.id;
+  const { newval } = req.body;
+  if(!newval) return res.json({error:"Please input a valid string"});
+
+  try{
+    const exists = await getUrlById(id);
+    if(!exists){
+      return res.status(400).json({error:"No such URLS exists"});
+    }
+
+    const result = await db.update(urlTable).set({shortCode:newval}).where(and(eq(id,urlTable.id),eq(urlTable.userId,req.user.id)))
+    if(result.rowCount==0){
+      return res.json({message:"No Row updated"});
+
+    }
+    return res.status(200).json({message:"Data successfully updated"});
+
+  }
+  catch(e){
+    console.log(e);
+    return res.json({error:e});
+
+  }
+
+})
 
 router.get("/:shortCode", async (req, res) => {
   const shortUrl = req.params.shortCode;
