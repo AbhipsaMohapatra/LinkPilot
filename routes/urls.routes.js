@@ -28,7 +28,7 @@ router.post(
     try {
       const { url, code } = validationResult.data;
       let shortCode = code ?? nanoid(6);
-      const result = await insertIntoUrlTable(url, code, userId);
+      const result = await insertIntoUrlTable(url, shortCode, userId);
       // const [result] = await db
       //   .insert(urlTable)
       //   .values({
