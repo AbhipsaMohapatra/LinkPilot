@@ -1,7 +1,7 @@
 services:
-   db:
+  db:
      image: postgres
-    #  restart: always
+     restart: always
      environment:
         POSTGRES_PASSWORD: admin
         POSTGRES_USER: postgres
@@ -10,6 +10,19 @@ services:
        - 5434:5432
      volumes:
        - db_data:/var/lib/postgresql
+  redis:
+    image : redis:7-alpine
+    container_name: url_shortner_cache
+    restart : always
+    ports :
+      - 6379:6379
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data  
+
+
+       
 
 volumes:
   db_data :
+  redis_data:

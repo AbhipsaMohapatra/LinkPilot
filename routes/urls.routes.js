@@ -10,6 +10,8 @@ import { isExistingUserAuthenticated } from "../middleware/auth.middleware.js";
 import { insertIntoUrlTable } from "../services/users.services.js";
 import { userTable } from "../models/userModel.js";
 import { getUrlById } from "../services/urls.services.js";
+import { redis } from "../db/redis.js";
+
 
 const router = express.Router();
 
@@ -48,6 +50,7 @@ router.post(
         shortCode: result.shortCode,
         targetUrl: result.targetUrl,
       });
+      
     } catch (error) {
       console.log(error);
       res.status(500).json({ error });
@@ -93,6 +96,7 @@ router.delete("/:id",[authValidateMiddleware, isExistingUserAuthenticated], asyn
     if(result.rowCount==0){
       return res.json({message:"No data deleted"})
     }
+    await redis.del(`url:${exists.shortCode}`);
     return res.json({message:`data deleted`});
   } catch (error) {
     console.log(error);
@@ -116,6 +120,9 @@ router.patch("/update/:id",[authValidateMiddleware,isExistingUserAuthenticated],
       return res.json({message:"No Row updated"});
 
     }
+    // --- CACHE INVALIDATION ---
+    // If the shortCode identifier changed, clear the OLD one so it doesn't linger in RAM
+    await redis.del(`url:${exists.shortCode}`);
     return res.status(200).json({message:"Data successfully updated"});
 
   }
@@ -129,7 +136,12 @@ router.patch("/update/:id",[authValidateMiddleware,isExistingUserAuthenticated],
 
 router.get("/:shortCode", async (req, res) => {
   const shortUrl = req.params.shortCode;
+  const cacheKey = `url:${shortUrl}`;
   try {
+    const cachedTargetUrl = await redis.get(cacheKey);
+    if (cachedTargetUrl) {
+      return res.redirect(cachedTargetUrl); // Cache Hit!
+    }
     const [result] = await db
       .select({ targetUrl: urlTable.targetUrl })
       .from(urlTable)
@@ -137,6 +149,8 @@ router.get("/:shortCode", async (req, res) => {
     if (!result) {
       return res.status(400).json({ error: "No such url present" });
     }
+    // 3. Save back to Redis for next time with a 24-hour expiration window (86400 seconds)
+    await redis.set(cacheKey, result.targetUrl, "EX", 86400);
     res.redirect(result.targetUrl);
   } catch (error) {
     console.log(error);
